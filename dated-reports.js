@@ -51,7 +51,7 @@ async function deliver(plan,share){
  if(share)alert('PDF guardado. Podes enviá-lo pelo WhatsApp ou por e-mail a partir de Ficheiros.');
 }
 function reports(){
- if(view!=='relatorios')return;
+ if(view!=='planos')return;
  const panel=document.querySelector('.share-panel');if(!panel)return;
  const c=panel.querySelector('#shareClient'),g=panel.querySelector('#shareGroup');
  if(!c||!g)return;
@@ -85,5 +85,6 @@ function sessions(){
   const date=document.querySelector('#sessionDate');if(date)date.value=p.data;
  },true);
 }
+window.GymBodyDatedPDF={deliver};
 const previous=render;render=function(){previous();reports()};reports();
 })();
