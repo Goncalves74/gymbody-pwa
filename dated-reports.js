@@ -28,16 +28,17 @@ async function pdf(plan){
  const prepared=await Promise.all(rows.map(async(row,i)=>{const ex=get('exercicios',row.exercicioId);return {row,i,name:ex?.nome||'Exercicio removido',image:await imageJPEG(ex?.foto||ex?.repdbImage),sets:setRows(row)}}));
  const header=()=>{
  doc.setFillColor(...green);doc.rect(0,0,210,9,'F');
- txt(fit(db.config?.ginasio||'GymBody',115,11),12,17,11,true);
- right('GUIAO DE TREINO',198,17,10,true);
+ // All header text begins at the left margin: never depend on PDF right-alignment metrics.
+ txt(fit(db.config?.ginasio||'GymBody',180,11),12,17,11,true);
  doc.setDrawColor(...border);doc.line(12,20,198,20);
- txt(fit('Cliente: '+(c?.nome||'Cliente removido'),133,9),12,27,9,true);
- right('Data: '+fmtDate(plan.data),198,27,9,true);
- txt(fit('Sessao: '+(plan.nome||''),186,8),12,34,8);
- if(plan.tipo)txt(fit('Tipo de treino: '+plan.tipo,186,8),12,41,8);
- txt(fit('PT: '+(db.config?.pt||'Nao definido'),186,8),12,plan.tipo?48:41,8);
+ txt('GUIAO INDIVIDUAL DE TREINO',12,27,10,true);
+ txt(fit('Cliente: '+(c?.nome||'Cliente removido'),180,9),12,35,9,true);
+ txt('Data: '+fmtDate(plan.data),12,42,9);
+ txt(fit('Sessao: '+(plan.nome||''),180,8),12,49,8);
+ if(plan.tipo)txt(fit('Tipo de treino: '+plan.tipo,180,8),12,56,8);
+ txt(fit('PT: '+(db.config?.pt||'Nao definido'),180,8),12,plan.tipo?63:56,8);
  };
- const top=plan.tipo?55:48,footer=282, gap=4,left=12,colW=91, usable=footer-top;
+ const top=plan.tipo?70:63,footer=282, gap=4,left=12,colW=91, usable=footer-top;
  const cardHeight=(entry,compact)=>{const count=entry.sets.length;const perRow=compact?3:2;const lines=Math.ceil(count/perRow);return (compact?22:28)+lines*(compact?6.2:7.2)+(entry.image?(compact?21:29):0)};
  let layout=null;
  for(const compact of [false,true]){
@@ -67,7 +68,7 @@ async function pdf(plan){
    if(image){const iw=small?25:34,ih=small?17:24,ratio=image.w/image.h;const dw=Math.min(iw,ih*ratio),dh=Math.min(ih,iw/ratio);doc.addImage(image.data,'JPEG',x+colW-dw-3,y+h-dh-2,dw,dh)}
  };
  pages.forEach((cols,pageIndex)=>{if(pageIndex)doc.addPage();header();for(let k=0;k<2;k++)for(const box of cols[k])drawCard(box,k);
-   doc.setDrawColor(...border);doc.line(12,286,198,286);txt('GymBody  |  Exercicios por ordem numerica',12,292,7.5);right('Pagina '+(pageIndex+1)+'/'+pages.length,198,292,7.5);
+   doc.setDrawColor(...border);doc.line(12,286,198,286);txt('GymBody  |  Exercicios por ordem numerica',12,292,7.5);txt('Pagina '+(pageIndex+1)+'/'+pages.length,150,292,7.5);
  });
  const blob=doc.output('blob'),filename='GymBody_Treino_'+safe(c?.nome||'Cliente')+'_'+plan.data+'.pdf';
  return {blob,filename};
