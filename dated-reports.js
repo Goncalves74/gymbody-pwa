@@ -39,7 +39,7 @@ async function pdf(plan){
  txt(fit('PT: '+(db.config?.pt||'Nao definido'),180,8),12,plan.tipo?63:56,8);
  };
  const top=plan.tipo?70:63,footer=282, gap=4,left=12,colW=91, usable=footer-top;
- const cardHeight=(entry,compact)=>{const count=entry.sets.length;const perRow=compact?3:2;const lines=Math.ceil(count/perRow);return (compact?22:28)+lines*(compact?6.2:7.2)+(entry.image?(compact?21:29):0)};
+ const cardHeight=(entry,compact)=>{const rowStep=compact?6.3:7.2;const contentHeight=(compact?23:27)+entry.sets.length*rowStep;const imageHeight=entry.image?(compact?43:51):0;return Math.max(contentHeight,imageHeight)};
  let layout=null;
  for(const compact of [false,true]){
    const cols=[[],[]],heights=[0,0];
@@ -61,11 +61,12 @@ async function pdf(plan){
    doc.setFillColor(...pale);doc.rect(x+.3,y+.3,colW-.6,small?12:15,'F');
    doc.setFillColor(...green);doc.rect(x+2,y+2,10,10,'F');txt(String(i+1),x+7,y+9,10,true,[255,255,255]);
    txt(fit(name,colW-18,small?8.4:9),x+14,y+9,small?8.4:9,true);
-   let yy=y+(small?17:20);
-   txt('Descanso: '+(row.descanso||0)+' s',x+3,yy,7.5);yy+=small?6:7;
-   const per=small?3:2,cell=(colW-6)/per;
-   sets.forEach((set,j)=>{const col=j%per,line=Math.floor(j/per),sx=x+3+col*cell,sy=yy+line*(small?6.2:7.2);txt(fit((j+1)+': '+set.reps+' x '+String(set.carga).replace('.',',')+' kg',cell-2,small?7.1:8),sx,sy,small?7.1:8)});
-   if(image){const iw=small?25:34,ih=small?17:24,ratio=image.w/image.h;const dw=Math.min(iw,ih*ratio),dh=Math.min(ih,iw/ratio);doc.addImage(image.data,'JPEG',x+colW-dw-3,y+h-dh-2,dw,dh)}
+   let yy=y+(small?18:21);
+   txt('Descanso: '+(row.descanso||0)+' s',x+3,yy,7.5);yy+=small?7:8;
+   const step=small?6.3:7.2;
+   sets.forEach((set,j)=>{const label=(j+1)+'.ª série: '+set.reps+' rep.  |  '+String(set.carga).replace('.',',')+' kg';txt(fit(label,image?colW-39:colW-6,small?7.3:8),x+3,yy+j*step,small?7.3:8)});
+   if(image){const iw=small?29:35,ih=small?28:35,ratio=image.w/image.h;const dw=Math.min(iw,ih*ratio),dh=Math.min(ih,iw/ratio);doc.addImage(image.data,'JPEG',x+colW-dw-3,y+h-dh-3,dw,dh)}
+
  };
  pages.forEach((cols,pageIndex)=>{if(pageIndex)doc.addPage();header();for(let k=0;k<2;k++)for(const box of cols[k])drawCard(box,k);
    doc.setDrawColor(...border);doc.line(12,286,198,286);txt('GymBody  |  Exercicios por ordem numerica',12,292,7.5);txt('Pagina '+(pageIndex+1)+'/'+pages.length,150,292,7.5);
