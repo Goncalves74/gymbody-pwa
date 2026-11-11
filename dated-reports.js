@@ -50,27 +50,6 @@ async function deliver(plan,share){
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
  if(share)alert('PDF guardado. Podes enviá-lo pelo WhatsApp ou por e-mail a partir de Ficheiros.');
 }
-function reports(){
- if(view!=='planos')return;
- const panel=document.querySelector('.share-panel');if(!panel)return;
- const c=panel.querySelector('#shareClient'),g=panel.querySelector('#shareGroup');
- if(!c||!g)return;
- const old=panel.querySelector('#sharePlanDate');old?.closest('label')?.remove();old?.remove();
- const dateLabel=panel.querySelector('label[for="sharePlanDate"]');dateLabel?.remove();
- panel.querySelector('p').textContent='Seleciona um treino guardado para uma data específica. Podes descarregar o guião em PDF ou partilhá-lo no WhatsApp.';
- const update=()=>{const rows=plans().filter(p=>p.clienteId===c.value).sort((a,b)=>a.data.localeCompare(b.data));g.innerHTML='<option value="">Selecionar treino</option>'+rows.map(p=>'<option value="'+esc(p.id)+'">'+esc(fmtDate(p.data)+' · '+p.nome+' ('+p.exercicios.length+' exercícios)')+'</option>').join('')};
- const oldC=c.cloneNode(true);c.replaceWith(oldC);oldC.addEventListener('change',update);
- g.innerHTML='<option value="">Selecionar treino</option>';
- for(const [buttonId,share,label] of [['sharePdf',false,'Guardar guião PDF'],['shareWhatsapp',true,'Enviar PDF / WhatsApp']]){
-  const oldButton=panel.querySelector('#'+buttonId);if(!oldButton)continue;
-  const button=oldButton.cloneNode(true);oldButton.replaceWith(button);button.textContent=label;
-  button.addEventListener('click',async()=>{
-   const plan=plans().find(p=>p.id===g.value&&p.clienteId===oldC.value);
-   if(!plan)return alert('Seleciona um cliente e um treino agendado.');
-   button.disabled=true;try{await deliver(plan,share)}catch(err){if(err?.name!=='AbortError')alert('Erro ao gerar o PDF: '+err.message)}finally{button.disabled=false}
-  });
- }
-}
 function sessions(){
  if(view!=='sessoes')return;
  const picker=document.querySelector('#sessionPlan');if(!picker)return;
@@ -86,5 +65,5 @@ function sessions(){
  },true);
 }
 window.GymBodyDatedPDF={deliver};
-const previous=render;render=function(){previous();reports()};reports();
+// PDF sharing is invoked directly from each dated plan card.
 })();
