@@ -1,0 +1,19 @@
+{
+  "name": "GymBody PWA",
+  "short_name": "GymBody",
+  "description": "Gestão de treinos para personal trainers",
+  "lang": "pt-PT",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#163f3b",
+  "background_color": "#f2f6f4",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
