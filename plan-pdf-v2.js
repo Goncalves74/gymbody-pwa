@@ -27,6 +27,7 @@ async function logoData(){
 async function buildPlan(p,plannedDate){
  if(!window.GymBodyPDF)throw Error('O módulo PDF não está disponível. Atualiza a aplicação.');
  const doc=new window.GymBodyPDF(),primary=pdfColor(db.config?.cor);
+ const dated=(db.planosDatados||[]).filter(x=>x.clienteId===p.client.id&&x.data===plannedDate).sort((a,b)=>b.exercicios.length-a.exercicios.length)[0];
  let y=18,page=1;
  const line=(t,x=20,size=10,bold=false)=>{doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(35,59,57);doc.text(ascii(t),x,y)};
  const newPage=()=>{doc.addPage();page++;y=21;doc.setFillColor(...primary);doc.rect(17,12,176,2,'F')};
@@ -42,6 +43,7 @@ async function buildPlan(p,plannedDate){
  line('Cliente: '+p.client.nome);y+=7;
  line('Numero de cliente: '+(p.client.numero||'—'));y+=7;
  line('Treino: '+p.group,20,11,true);y+=7;
+ if(dated){line('Nome da sessao: '+dated.nome,20,10,true);y+=7;if(dated.tipo){line('Tipo de treino: '+dated.tipo,20,10,true);y+=7}}
  line('Data prevista: '+formatDate(plannedDate),20,11,true);y+=7;
  line('Emitido em: '+new Date().toLocaleDateString('pt-PT'));y+=13;
  const headings=()=>{doc.setFillColor(231,244,240);doc.rect(20,y-6,170,10,'F');line('EXERCICIO',23,8,true);line('SER.',119,8,true);line('REP.',137,8,true);line('CARGA',159,8,true);y+=11};
