@@ -10,7 +10,7 @@ const icons={inicio:'⌂',clientes:'♙',avaliacoes:'◉',exercicios:'▦',plano
 const labels={inicio:'Início',clientes:'Clientes',avaliacoes:'Avaliações',exercicios:'Exercícios',planos:'Planos',registos:'Treinos',sessoes:'Sessões',relatorios:'Relatórios',config:'Definições',dados:'Dados'};
 const shortNav=['inicio','clientes','sessoes','relatorios','config'];
 const esc=h;
-function goto(k){view=k;render();window.scrollTo({top:0,behavior:'smooth'})}
+function goto(k){try{if(k==='sessoes'&&typeof screens.sessoes!=='function')throw Error('Módulo Sessões não carregado.');view=k;render();window.scrollTo({top:0,behavior:'smooth'})}catch(err){console.error('GymBody navegação:',err);alert('Não foi possível abrir '+k+': '+(err?.message||err));view='inicio';try{render()}catch(e){console.error(e)}}}
 function home(){
 const gym=String(db.config?.ginasio||'').trim(),pt=String(db.config?.pt||'').trim()||'Personal Trainer';
 const stats=[['Clientes',db.clientes.length],['Avaliações',db.avaliacoes.length],['Planos',db.planos.length],['Sessões',db.sessoes?.length||0]];
