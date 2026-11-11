@@ -37,7 +37,7 @@ function enhance(){const header=document.querySelector('header');if(header&&!hea
 nav.querySelectorAll('[data-view]').forEach(b=>{const k=b.dataset.view;b.innerHTML='<span class="nav-icon" aria-hidden="true">'+(icons[k]||'•')+'</span><span>'+esc(labels[k]||k)+'</span>';b.hidden=!shortNav.includes(k)});
 if(view==='inicio'){root.innerHTML=home();root.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>goto(b.dataset.go)))}
 if(view==='clientes')decorateClients();
-if(view==='planos')sharePanel();
+// O envio é feito diretamente na lista de planos.
 }
 const baseRender=render;render=function(){baseRender();enhance()};enhance();
 })();
