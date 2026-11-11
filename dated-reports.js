@@ -33,9 +33,9 @@ async function pdf(plan){
  write('Data: '+fmtDate(plan.data));y+=13;
  for(const [i,row] of plan.exercicios.entries()){
   const ex=get('exercicios',row.exercicioId),label=(i+1)+'. '+(ex?.nome||'Exercicio removido');
-  const illustration=await imageJPEG(ex?.foto||ex?.repdbImage);const height=illustration?66:37;need(height);
+  const illustration=await imageJPEG(ex?.foto||ex?.repdbImage);const height=(illustration?66:37)+Math.max(0,(Number(row.series)||1)-1)*7;need(height);
   doc.setFillColor(234,246,242);doc.rect(19,y-6,172,9,'F');write(label.slice(0,72),22,10,true);y+=12;
-  write('Series: '+row.series+'    Repeticoes: '+row.reps+'    Carga: '+String(row.carga).replace('.',',')+' kg',22,9);y+=7;
+  write('Series: '+row.series,22,9);y+=7;const series=Array.from({length:Math.max(1,Number(row.series)||1)},(_,j)=>row.seriesDetalhe?.[j]||{reps:row.reps,carga:row.carga});for(const [j,s] of series.entries()){need(8);write('Serie '+(j+1)+': '+s.reps+' repeticoes  ·  '+String(s.carga).replace('.',',')+' kg',24,9);y+=7;}
   write('Descanso: '+(row.descanso||0)+' segundos',22,9);y+=8;if(illustration){const w=Math.min(60,illustration.w*48/illustration.h),hh=w*illustration.h/illustration.w;doc.addImage(illustration.data,'JPEG',22,y,w,hh);y+=hh+4}
   doc.setDrawColor(190,212,205);doc.line(22,y,188,y);y+=10;
  }
