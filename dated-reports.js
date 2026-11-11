@@ -74,5 +74,5 @@ function sessions(){
   const date=document.querySelector('#sessionDate');if(date)date.value=p.data;
  },true);
 }
-const previous=render;render=function(){previous();reports();sessions()};reports();sessions();
+const previous=render;render=function(){previous();reports()};reports();
 })();
