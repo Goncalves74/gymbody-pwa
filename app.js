@@ -7,7 +7,7 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const id=()=>crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
 const get=(k,id)=>db[k].find(x=>x.id===id);
 const options=(k,sel='')=>'<option value="">Selecionar</option>'+db[k].map(x=>'<option value="'+h(x.id)+'" '+(x.id===sel?'selected':'')+'>'+h(x.nome)+'</option>').join('');
-const parseDecimal=(value,min,max,required=false)=>{const raw=String(value??'').trim().replace(/\\s/g,'').replace(',','.');if(!raw)return required?null:'';if(!/^(?:\\d+(?:\\.\\d+)?|\\.\\d+)$/.test(raw))return null;const n=Number(raw);return Number.isFinite(n)&&n>=min&&n<=max?String(n):null};
+const parseDecimal=(value,min,max,required=false)=>{const raw=String(value??'').trim().replace(/\s/g,'').replace(',','.');if(!raw)return required?null:'';if(!/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(raw))return null;const n=Number(raw);return Number.isFinite(n)&&n>=min&&n<=max?String(n):null};
 const nums=(n,sel)=>Array.from({length:n},(_,i)=>'<option '+(i+1===sel?'selected':'')+'>'+(i+1)+'</option>').join('');
 const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 const save=()=>{if(blocked){alert('Importa uma cópia válida antes de guardar.');return false}try{localStorage.setItem(KEY,JSON.stringify(db));return true}catch{alert('Erro ao guardar no dispositivo.');return false}};
