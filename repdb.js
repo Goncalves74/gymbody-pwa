@@ -3,6 +3,8 @@
 const BASE='https://exercise-dataset.com/';
 let remote=null,loading=null,query='',group='',page=0;
 const PAGE=24;
+window.GymBodyAllExercises=()=>load();
+window.GymBodyRepDBInfo=x=>({nome:name(x),grupo:tr(x.body_part),repdbId:x.id,repdbImage:imageOf(x,'start'),repdbImageEnd:imageOf(x,'peak'),equipamento:x.equipment||'',musculos:muscles(x.primary_muscles)});
 const esc=h;
 const map={chest:'Peito',back:'Costas',shoulders:'Ombros',arms:'Braços',upper_arms:'Braços',lower_arms:'Braços',legs:'Pernas',upper_legs:'Pernas',lower_legs:'Pernas',glutes:'Glúteos',waist:'Core',core:'Core',cardio:'Cardio',full_body:'Corpo inteiro'};
 const tr=s=>map[String(s||'').toLowerCase().replace(/[ -]/g,'_')]||String(s||'Outro').replace(/_/g,' ');
