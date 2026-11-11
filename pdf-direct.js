@@ -1,8 +1,6 @@
 'use strict';
 (function(){
-const CDN='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js';
-let pending;
-function loadPdf(){if(window.jspdf?.jsPDF)return Promise.resolve(window.jspdf.jsPDF);if(pending)return pending;pending=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=CDN;s.crossOrigin='anonymous';s.onload=()=>window.jspdf?.jsPDF?resolve(window.jspdf.jsPDF):reject(Error('Biblioteca PDF indisponível'));s.onerror=()=>reject(Error('Não foi possível carregar o gerador PDF. Verifica a Internet.'));document.head.appendChild(s)}).catch(e=>{pending=null;throw e});return pending}
+function loadPdf(){if(!window.GymBodyPDF)throw Error('Gerador PDF local não carregado. Atualiza a aplicação.');return Promise.resolve(window.GymBodyPDF)}
 const n=v=>{const a=Number(String(v??'').replace(',','.'));return Number.isFinite(a)?a:null};
 const fmt=v=>{const a=n(v);return a===null?'—':a.toLocaleString('pt-PT',{maximumFractionDigits:2})};
 const dt=s=>{const a=String(s||'').split('-');return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:s||'—'};
