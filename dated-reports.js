@@ -1,0 +1,78 @@
+'use strict';
+/* Integrates dated plans with reporting and native PDF sharing. */
+(function(){
+const esc=h,fmtDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||'')?s.slice(8)+'/'+s.slice(5,7)+'/'+s.slice(0,4):s;
+const ascii=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\xFF]/g,'?');
+const safe=s=>ascii(s).replace(/[^a-z0-9_-]+/gi,'_').slice(0,50);
+const plans=()=>Array.isArray(db.planosDatados)?db.planosDatados:[];
+function pdf(plan){
+ if(!window.GymBodyPDF)throw Error('O gerador de PDF não está disponível.');
+ const doc=new GymBodyPDF();let y=23;
+ const write=(s,x=20,size=10,bold=false)=>{doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(23,59,56);doc.text(ascii(s),x,y)};
+ const page=()=>{doc.addPage();y=24;doc.setFillColor(12,112,104);doc.rect(0,0,210,9,'F')};
+ const need=n=>{if(y+n>276)page()};
+ const c=get('clientes',plan.clienteId);
+ doc.setFillColor(12,112,104);doc.rect(0,0,210,9,'F');
+ write(db.config?.ginasio||'GymBody',20,17,true);y+=12;
+ write('GUIAO INDIVIDUAL DE TREINO',20,14,true);y+=11;
+ write('Cliente: '+(c?.nome||'Cliente removido'));y+=7;
+ write('N.º cliente: '+(c?.numero||'—'));y+=7;
+ write('Personal Trainer: '+(db.config?.pt||'Nao definido'));y+=7;
+ write('Sessao: '+plan.nome);y+=7;
+ write('Data: '+fmtDate(plan.data));y+=13;
+ plan.exercicios.forEach((row,i)=>{
+  const ex=get('exercicios',row.exercicioId),label=(i+1)+'. '+(ex?.nome||'Exercicio removido');
+  need(37);
+  doc.setFillColor(234,246,242);doc.rect(19,y-6,172,9,'F');write(label.slice(0,72),22,10,true);y+=12;
+  write('Series: '+row.series+'    Repeticoes: '+row.reps+'    Carga: '+String(row.carga).replace('.',',')+' kg',22,9);y+=7;
+  write('Descanso: '+(row.descanso||0)+' segundos',22,9);y+=8;
+  doc.setDrawColor(190,212,205);doc.line(22,y,188,y);y+=10;
+ });
+ need(20);write('Notas / observacoes:',20,9,true);y+=9;doc.setDrawColor(190,212,205);doc.line(20,y,190,y);
+ const blob=doc.output('blob'),filename='GymBody_Treino_'+safe(c?.nome||'Cliente')+'_'+plan.data+'.pdf';
+ return {blob,filename};
+}
+async function deliver(plan,share){
+ const {blob,filename}=pdf(plan);
+ const file=new File([blob],filename,{type:'application/pdf'});
+ if(share&&navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:'Guiao de treino '+fmtDate(plan.data)});return}
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+ if(share)alert('PDF guardado. Podes enviá-lo pelo WhatsApp ou por e-mail a partir de Ficheiros.');
+}
+function reports(){
+ if(view!=='relatorios')return;
+ const panel=document.querySelector('.share-panel');if(!panel)return;
+ const c=panel.querySelector('#shareClient'),g=panel.querySelector('#shareGroup');
+ if(!c||!g)return;
+ const old=panel.querySelector('#sharePlanDate');old?.closest('label')?.remove();old?.remove();
+ const dateLabel=panel.querySelector('label[for="sharePlanDate"]');dateLabel?.remove();
+ panel.querySelector('p').textContent='Seleciona um treino guardado para uma data específica. Podes descarregar o guião em PDF ou partilhá-lo no WhatsApp.';
+ const update=()=>{const rows=plans().filter(p=>p.clienteId===c.value).sort((a,b)=>a.data.localeCompare(b.data));g.innerHTML='<option value="">Selecionar treino</option>'+rows.map(p=>'<option value="'+esc(p.id)+'">'+esc(fmtDate(p.data)+' · '+p.nome+' ('+p.exercicios.length+' exercícios)')+'</option>').join('')};
+ const oldC=c.cloneNode(true);c.replaceWith(oldC);oldC.addEventListener('change',update);
+ g.innerHTML='<option value="">Selecionar treino</option>';
+ for(const [buttonId,share,label] of [['sharePdf',false,'Guardar guião PDF'],['shareWhatsapp',true,'Enviar PDF / WhatsApp']]){
+  const oldButton=panel.querySelector('#'+buttonId);if(!oldButton)continue;
+  const button=oldButton.cloneNode(true);oldButton.replaceWith(button);button.textContent=label;
+  button.addEventListener('click',async()=>{
+   const plan=plans().find(p=>p.id===g.value&&p.clienteId===oldC.value);
+   if(!plan)return alert('Seleciona um cliente e um treino agendado.');
+   button.disabled=true;try{await deliver(plan,share)}catch(err){if(err?.name!=='AbortError')alert('Erro ao gerar o PDF: '+err.message)}finally{button.disabled=false}
+  });
+ }
+}
+function sessions(){
+ if(view!=='sessoes')return;
+ const picker=document.querySelector('#sessionPlan');if(!picker)return;
+ const client=document.querySelector('#sessionClient')?.value;
+ const rows=plans().filter(p=>p.clienteId===client).sort((a,b)=>a.data.localeCompare(b.data));
+ picker.innerHTML='<option value="">Selecionar treino agendado</option>'+rows.map(p=>'<option value="'+esc(p.id)+'">'+esc(fmtDate(p.data)+' · '+p.nome)+'</option>').join('');
+ picker.addEventListener('change',event=>{
+  const p=plans().find(x=>x.id===event.target.value);if(!p)return;
+  sessionPlan=p.nome+' · '+fmtDate(p.data);
+  sessionDraft=p.exercicios.map(x=>({exerciseId:x.exercicioId,planId:x.exercicioId,sets:Array.from({length:Number(x.series)||1},()=>({reps:Number(x.reps),carga:Number(x.carga),done:false}))}));
+  sessionMode='livre';render();
+  const date=document.querySelector('#sessionDate');if(date)date.value=p.data;
+ },true);
+}
+const previous=render;render=function(){previous();reports();sessions()};reports();sessions();
+})();
