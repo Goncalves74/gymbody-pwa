@@ -29,7 +29,7 @@ async function pdf(plan){
  write('Cliente: '+(c?.nome||'Cliente removido'));y+=7;
  write('N.º cliente: '+(c?.numero||'—'));y+=7;
  write('Personal Trainer: '+(db.config?.pt||'Nao definido'));y+=7;
- write('Sessao: '+plan.nome);y+=7;if(plan.tipo){write('Tipo: '+plan.tipo);y+=7;}if(plan.tipo){write('Tipo: '+plan.tipo);y+=7;}
+ write('Sessao: '+plan.nome);y+=7;if(plan.tipo){write('Tipo de treino: '+plan.tipo);y+=7;}
  write('Data: '+fmtDate(plan.data));y+=13;
  for(const [i,row] of plan.exercicios.entries()){
   const ex=get('exercicios',row.exercicioId),label=(i+1)+'. '+(ex?.nome||'Exercicio removido');
