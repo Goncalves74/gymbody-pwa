@@ -20,12 +20,19 @@ async function pdf(plan){
  if(!window.GymBodyPDF)throw Error('O gerador de PDF não está disponível.');
  const doc=new GymBodyPDF(),c=get('clientes',plan.clienteId),rows=plan.exercicios||[];
  const ink=[23,59,56],green=[12,112,104],pale=[234,246,242],border=[195,218,211];
+ const width=(v,size=9)=>Array.from(ascii(v)).reduce((sum,ch)=>sum+(ch===' '?0.25:ch==='i'||ch==='l'?0.27:ch==='W'||ch==='M'?0.9:0.52)*size/2.83465,0);
+ const fit=(v,max,size=9)=>{const t=ascii(v);if(width(t,size)<=max)return t;let result=t;while(result.length&&width(result+'...',size)>max)result=result.slice(0,-1);return result+'...'};
  const txt=(v,x,y,size=9,bold=false,color=ink)=>{doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(size);doc.setTextColor(...color);doc.text(ascii(v),x,y)};
- const fit=(v,max,size=9)=>{let t=ascii(v);const limit=Math.max(4,Math.floor(max*2.83/(size*.54)));return t.length>limit?t.slice(0,limit-1)+'…':t};
+ const right=(v,rightX,y,size=9,bold=false,color=ink)=>{const t=ascii(v);txt(t,rightX-width(t,size),y,size,bold,color)};
  const setRows=row=>Array.from({length:Math.max(1,Math.min(20,Number(row.series)||1))},(_,i)=>row.seriesDetalhe?.[i]||{reps:row.reps,carga:row.carga});
  const prepared=await Promise.all(rows.map(async(row,i)=>{const ex=get('exercicios',row.exercicioId);return {row,i,name:ex?.nome||'Exercicio removido',image:await imageJPEG(ex?.foto||ex?.repdbImage),sets:setRows(row)}}));
- const header=()=>{doc.setFillColor(...green);doc.rect(0,0,210,9,'F');txt(fit(db.config?.ginasio||'GymBody',130,11),12,17,11,true);txt('GUIAO DE TREINO',198,17,10,true);doc.setDrawColor(...border);doc.line(12,20,198,20);
- txt(fit('Cliente: '+(c?.nome||'Cliente removido'),113,9),12,27,9,true);txt('Data: '+fmtDate(plan.data),198,27,9,true);
+ const header=()=>{
+ doc.setFillColor(...green);doc.rect(0,0,210,9,'F');
+ txt(fit(db.config?.ginasio||'GymBody',115,11),12,17,11,true);
+ right('GUIAO DE TREINO',198,17,10,true);
+ doc.setDrawColor(...border);doc.line(12,20,198,20);
+ txt(fit('Cliente: '+(c?.nome||'Cliente removido'),133,9),12,27,9,true);
+ right('Data: '+fmtDate(plan.data),198,27,9,true);
  txt(fit('Sessao: '+(plan.nome||''),186,8),12,34,8);
  if(plan.tipo)txt(fit('Tipo de treino: '+plan.tipo,186,8),12,41,8);
  txt(fit('PT: '+(db.config?.pt||'Nao definido'),186,8),12,plan.tipo?48:41,8);
@@ -52,15 +59,15 @@ async function pdf(plan){
    doc.setDrawColor(...border);doc.setLineWidth(.3);doc.rect(x,y,colW,h);
    doc.setFillColor(...pale);doc.rect(x+.3,y+.3,colW-.6,small?12:15,'F');
    doc.setFillColor(...green);doc.rect(x+2,y+2,10,10,'F');txt(String(i+1),x+7,y+9,10,true,[255,255,255]);
-   txt(fit(name,colW-17,small?8.4:9),x+14,y+9,small?8.4:9,true);
+   txt(fit(name,colW-18,small?8.4:9),x+14,y+9,small?8.4:9,true);
    let yy=y+(small?17:20);
    txt('Descanso: '+(row.descanso||0)+' s',x+3,yy,7.5);yy+=small?6:7;
    const per=small?3:2,cell=(colW-6)/per;
-   sets.forEach((set,j)=>{const col=j%per,line=Math.floor(j/per),sx=x+3+col*cell,sy=yy+line*(small?6.2:7.2);txt((j+1)+': '+set.reps+' x '+String(set.carga).replace('.',',')+' kg',sx,sy,small?7.1:8)});
+   sets.forEach((set,j)=>{const col=j%per,line=Math.floor(j/per),sx=x+3+col*cell,sy=yy+line*(small?6.2:7.2);txt(fit((j+1)+': '+set.reps+' x '+String(set.carga).replace('.',',')+' kg',cell-2,small?7.1:8),sx,sy,small?7.1:8)});
    if(image){const iw=small?25:34,ih=small?17:24,ratio=image.w/image.h;const dw=Math.min(iw,ih*ratio),dh=Math.min(ih,iw/ratio);doc.addImage(image.data,'JPEG',x+colW-dw-3,y+h-dh-2,dw,dh)}
  };
  pages.forEach((cols,pageIndex)=>{if(pageIndex)doc.addPage();header();for(let k=0;k<2;k++)for(const box of cols[k])drawCard(box,k);
-   doc.setDrawColor(...border);doc.line(12,286,198,286);txt('GymBody  |  Exercicios por ordem numerica',12,292,7.5);txt('Pagina '+(pageIndex+1)+'/'+pages.length,198,292,7.5);
+   doc.setDrawColor(...border);doc.line(12,286,198,286);txt('GymBody  |  Exercicios por ordem numerica',12,292,7.5);right('Pagina '+(pageIndex+1)+'/'+pages.length,198,292,7.5);
  });
  const blob=doc.output('blob'),filename='GymBody_Treino_'+safe(c?.nome||'Cliente')+'_'+plan.data+'.pdf';
  return {blob,filename};
