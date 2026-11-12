@@ -5,7 +5,7 @@
  css.textContent='#gymUpdatePanel{border:2px solid var(--primary,#087f7a)}#gymForceUpdate{width:100%;margin:10px 0 6px}#gymUpdateStatus{min-height:1.4em}';
  document.head.appendChild(css);
  const oldConfig=screens.config;
- screens.config=()=>'<section id="gymUpdatePanel"><h2>Atualização da aplicação</h2><p class="muted">Versão 52 · Verifica e descarrega a versão mais recente do GymBody, sem eliminar os dados dos clientes.</p><button type="button" id="gymForceUpdate">Forçar atualização</button><p class="muted" id="gymUpdateStatus" role="status" aria-live="polite">É necessária uma ligação à internet.</p></section>'+oldConfig();
+ screens.config=()=>'<section id="gymUpdatePanel"><h2>Atualização da aplicação</h2><p class="muted">Versão 53 · Verifica e descarrega a versão mais recente do GymBody, sem eliminar os dados dos clientes.</p><button type="button" id="gymForceUpdate">Forçar atualização</button><p class="muted" id="gymUpdateStatus" role="status" aria-live="polite">É necessária uma ligação à internet.</p></section>'+oldConfig();
  const oldRender=render;
  render=function(){oldRender();if(view==='config')document.getElementById('gymForceUpdate')?.addEventListener('click',update)};
  async function update(){
