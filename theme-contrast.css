@@ -1,0 +1,39 @@
+/* GymBody v53.7: coherent contrast in light, dark and automatic themes.
+   Theme resolution remains owned by gym-enhancements.js. */
+html[data-gym-theme="light"]{color-scheme:light;--gym-surface:#fff;--gym-text:#183b3d;--gym-subtext:#526b6c;--gym-border:#cddcdb;--gym-field:#fff;--gym-field-text:#173b3d}
+html[data-gym-theme="dark"]{color-scheme:dark;--gym-surface:#1c292d;--gym-text:#eaf5f3;--gym-subtext:#bfd4d3;--gym-border:#496063;--gym-field:#263539;--gym-field-text:#f2fbf9}
+html[data-gym-theme] .exercise-detail,
+html[data-gym-theme] .custom-exercise-form,
+html[data-gym-theme] .custom-card,
+html[data-gym-theme] .exercise-card,
+html[data-gym-theme] .modal-content,
+html[data-gym-theme] [role="dialog"] .dialog-content{
+  background:var(--gym-surface)!important;color:var(--gym-text)!important;border-color:var(--gym-border)!important
+}
+html[data-gym-theme] .exercise-detail :is(h1,h2,h3,h4,p,li,strong,b,label,span),
+html[data-gym-theme] .custom-exercise-form :is(h1,h2,h3,h4,p,li,strong,b,label),
+html[data-gym-theme] .custom-card :is(h1,h2,h3,h4,p,li,strong,b,label),
+html[data-gym-theme] .modal-content :is(h1,h2,h3,h4,p,li,strong,b,label){
+  color:var(--gym-text)!important
+}
+html[data-gym-theme] .exercise-detail :is(small,.muted,.photo-hint),
+html[data-gym-theme] .custom-exercise-form :is(small,.muted,.photo-hint),
+html[data-gym-theme] .custom-card :is(small,.muted,.photo-hint){color:var(--gym-subtext)!important}
+html[data-gym-theme] .exercise-detail :is(input,textarea,select),
+html[data-gym-theme] .custom-exercise-form :is(input,textarea,select),
+html[data-gym-theme] .modal-content :is(input,textarea,select){
+ background:var(--gym-field)!important;color:var(--gym-field-text)!important;border:1px solid var(--gym-border)!important
+}
+html[data-gym-theme="light"] .exercise-detail .detail-art,
+html[data-gym-theme="light"] .exercise-card .art{background:#edf8f5!important}
+html[data-gym-theme="dark"] .exercise-detail .detail-art,
+html[data-gym-theme="dark"] .exercise-card .art{background:#29423f!important}
+html[data-gym-theme] .exercise-detail button:not(.secondary):not(.danger),
+html[data-gym-theme] .custom-exercise-form button:not(.secondary):not(.danger){color:white}
+html[data-gym-theme="dark"] .exercise-detail button.secondary{background:#355450!important;color:#fff!important}
+html[data-gym-theme="light"] .exercise-detail button.secondary{background:#e0efeb!important;color:#174c47!important}
+html[data-gym-theme="dark"] .exercise-detail :is(ol,ul),
+html[data-gym-theme="light"] .exercise-detail :is(ol,ul){color:var(--gym-text)!important}
+html[data-gym-theme] :is(input,textarea)::placeholder{opacity:1;color:var(--gym-subtext)}
+html[data-gym-theme] :is(input,select,textarea,button):focus-visible{outline:2px solid #28a89a;outline-offset:2px}
+@media print{html[data-gym-theme] .exercise-detail,html[data-gym-theme] .custom-exercise-form{background:white!important;color:#173e39!important}html[data-gym-theme] .exercise-detail :is(h1,h2,h3,p,li,span,strong){color:#173e39!important}}
