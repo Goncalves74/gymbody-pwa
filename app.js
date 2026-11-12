@@ -41,6 +41,32 @@ root.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=
 document.getElementById('reportClient')?.addEventListener('change',e=>{selectedClient=e.target.value;document.getElementById('reportArea').innerHTML=report()});
 document.getElementById('printReport')?.addEventListener('click',()=>{if(!selectedClient)return alert('Seleciona um cliente.');window.print()});
 document.getElementById('export')?.addEventListener('click',()=>{const blob=new Blob([JSON.stringify({version:2,data:db},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='gymbody-backup-'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)});
-document.getElementById('import')?.addEventListener('change',async e=>{try{const f=e.target.files[0];if(!f)return;if(f.size>5e6)throw Error('Ficheiro demasiado grande');const raw=JSON.parse(await f.text());if(![1,2].includes(raw.version)||!raw.data||!['clientes','exercicios','planos','registos'].every(k=>Array.isArray(raw.data[k])))throw Error('Formato inválido');if(!confirm('Substituir os dados atuais?'))return;const old=db;db={...defaults(),...raw.data,avaliacoes:Array.isArray(raw.data.avaliacoes)?raw.data.avaliacoes:[],config:{...defaults().config,...raw.data.config}};blocked=false;if(!save())db=old;render()}catch(err){alert('Erro na importação: '+err.message)}})
+document.getElementById('import')?.addEventListener('change',async e=>{
+ const input=e.target;
+ try{
+  const f=input.files?.[0];if(!f)return;
+  if(f.size>5e6)throw Error('Ficheiro demasiado grande (máximo 5 MB).');
+  const raw=JSON.parse(await f.text());
+  if(!raw||![1,2].includes(raw.version)||!raw.data||typeof raw.data!=='object'||Array.isArray(raw.data))throw Error('Formato ou versão de cópia inválidos.');
+  const required=['clientes','exercicios','planos','registos'];
+  const collections=['clientes','exercicios','planos','registos','avaliacoes','sessoes','planosDatados','modelosTreino','marcacoes'];
+  if(!required.every(k=>Array.isArray(raw.data[k])))throw Error('A cópia não contém as coleções obrigatórias.');
+  if(collections.some(k=>k in raw.data&&!Array.isArray(raw.data[k])))throw Error('Uma coleção de dados tem formato inválido.');
+  if('config'in raw.data&&(!raw.data.config||typeof raw.data.config!=='object'||Array.isArray(raw.data.config)))throw Error('Definições inválidas.');
+  if('pagamentos'in raw.data&&(!raw.data.pagamentos||typeof raw.data.pagamentos!=='object'||Array.isArray(raw.data.pagamentos)))throw Error('Pagamentos inválidos.');
+  for(const k of collections){if(!Array.isArray(raw.data[k]))continue;
+   if(raw.data[k].some(x=>!x||typeof x!=='object'||Array.isArray(x)||typeof x.id!=='string'||!x.id.trim()))throw Error('Registos inválidos na coleção '+k+'.');
+   const ids=raw.data[k].map(x=>x.id);if(new Set(ids).size!==ids.length)throw Error('Identificadores repetidos na coleção '+k+'.');
+  }
+  const counts=required.map(k=>k+': '+raw.data[k].length).join(', ');
+  if(!confirm('IMPORTAÇÃO SUBSTITUI TODOS OS DADOS ATUAIS.\\nCópia: '+f.name+'\\n'+counts+'\\n\\nAntes de continuar, exporta uma cópia dos dados atuais em Dados → Exportar JSON.\\n\\nConfirmas a substituição?'))return;
+  const old=db,wasBlocked=blocked;
+  const candidate={...defaults(),...raw.data,avaliacoes:Array.isArray(raw.data.avaliacoes)?raw.data.avaliacoes:[],config:{...defaults().config,...raw.data.config}};
+  db=candidate;blocked=false;
+  if(!save()){db=old;blocked=wasBlocked;throw Error('Não foi possível guardar. Os dados anteriores foram mantidos.');}
+  alert('Cópia importada com sucesso.');render();
+ }catch(err){alert('Erro na importação: '+err.message)}
+ finally{input.value=''}
+})
 }
 render();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
