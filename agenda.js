@@ -3,7 +3,7 @@
 (function(){
 if(!Array.isArray(db.marcacoes))db.marcacoes=[];
 let day=today(),editing='',prefillPlan='';
-const esc=h,validDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(v)&&!Number.isNaN(new Date(v+'T12:00:00').getTime());
+const esc=h,validDate=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;const [y,m,d]=s.split('-').map(Number);const dt=new Date(0);dt.setFullYear(y,m-1,d);return dt.getFullYear()===y&&dt.getMonth()===m-1&&dt.getDate()===d};
 const shift=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return [x.getFullYear(),String(x.getMonth()+1).padStart(2,'0'),String(x.getDate()).padStart(2,'0')].join('-')};
 const minutes=t=>{const [a,b]=t.split(':').map(Number);return a*60+b};
 const duration=x=>Number(x.duracao)||60;
