@@ -15,8 +15,8 @@ test('client creation through the interface persists after reload',async({page})
 test('invalid JSON import does not replace existing records',async({page})=>{
  await page.goto('/');
  await page.evaluate(()=>{db.clientes.push({id:'fixture',numero:'001',nome:'Cliente Fictício'});save();view='dados';render()});
+ page.once('dialog',d=>d.dismiss());
  await page.locator('#import').setInputFiles({name:'invalido.json',mimeType:'application/json',buffer:Buffer.from('{"version":2,"data":{"clientes":[],"exercicios":[],"planos":[],"registos":[{"nome":"Sem ID"}]}}')});
- const dialog=await page.waitForEvent('dialog');await dialog.dismiss();
  expect(await page.evaluate(()=>db.clientes.some(x=>x.id==='fixture'))).toBe(true);
 });
 test('import cancellation preserves records',async({page})=>{
