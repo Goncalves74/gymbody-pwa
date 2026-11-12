@@ -6,15 +6,15 @@ body{background:var(--bg);color:var(--ink);min-height:100vh}header{background:li
 `;
 const st=document.createElement('style');st.textContent=css+'.gym-name-notice{font-size:.85rem!important;color:#e2f7f3!important;margin:12px 0!important}.gym-name-notice button{display:inline-block;background:#ffffff25;color:white;border:1px solid #ffffff65;font-size:.78rem;padding:6px 9px;margin:4px 0;border-radius:8px}';document.head.appendChild(st);
 const print=document.createElement('div');print.id='clientPlanPrint';document.body.appendChild(print);
-const icons={inicio:'⌂',clientes:'♙',avaliacoes:'◉',exercicios:'▦',planos:'☷',registos:'✓',sessoes:'◷',relatorios:'▥',config:'⚙',dados:'⇩'};
-const labels={inicio:'Início',clientes:'Clientes',avaliacoes:'Avaliações',exercicios:'Exercícios',planos:'Planos',registos:'Treinos',sessoes:'Sessões',relatorios:'Relatórios',config:'Definições',dados:'Dados'};
-const shortNav=['inicio','clientes','sessoes','relatorios','config'];
+const icons={inicio:'⌂',clientes:'♙',avaliacoes:'◉',exercicios:'▦',planos:'☷',registos:'✓',sessoes:'◷',agenda:'▦',relatorios:'▥',config:'⚙',dados:'⇩'};
+const labels={inicio:'Início',clientes:'Clientes',avaliacoes:'Avaliações',exercicios:'Exercícios',planos:'Planos',registos:'Treinos',sessoes:'Sessões',agenda:'Agenda',relatorios:'Relatórios',config:'Definições',dados:'Dados'};
+const shortNav=['inicio','clientes','agenda','sessoes','config'];
 const esc=h;
 function goto(k){try{if(k==='sessoes'&&typeof screens.sessoes!=='function')throw Error('Módulo Sessões não carregado.');view=k;render();window.scrollTo({top:0,behavior:'smooth'})}catch(err){console.error('GymBody navegação:',err);alert('Não foi possível abrir '+k+': '+(err?.message||err));view='inicio';try{render()}catch(e){console.error(e)}}}
 function home(){
 const gym=String(db.config?.ginasio||'').trim(),pt=String(db.config?.pt||'').trim()||'Personal Trainer';
 const stats=[['Clientes',db.clientes.length],['Avaliações',db.avaliacoes.length],['Planos',db.planos.length],['Sessões',db.sessoes?.length||0]];
-const features=[['clientes','Gestão de clientes','Fichas individuais'],['avaliacoes','Nova avaliação','Medições manuais'],['planos','Planos de treino','Preparar exercícios'],['sessoes','Registar sessão','Plano ou treino livre'],['relatorios','Relatórios','Evolução e gráficos'],['exercicios','Exercícios','Biblioteca do PT'],['dados','Exportar dados','Cópia de segurança'],['config','Definições','Ginásio e PT']];
+const features=[['clientes','Gestão de clientes','Fichas individuais'],['avaliacoes','Nova avaliação','Medições manuais'],['planos','Planos de treino','Preparar exercícios'],['sessoes','Registar sessão','Plano ou treino livre'],['agenda','Agenda diária','Marcações e presenças'],['relatorios','Relatórios','Evolução e gráficos'],['exercicios','Exercícios','Biblioteca do PT'],['dados','Exportar dados','Cópia de segurança'],['config','Definições','Ginásio e PT']];
 return '<div class="hero"><span class="eyebrow">Painel de gestão</span>'+(gym?'<h2>'+esc(gym)+'</h2>':'<p class="gym-name-notice">Ainda não definiste o nome do ginásio. <button type="button" data-go="config">Inserir nome nas Definições</button></p>')+'<p>Bem-vindo, '+esc(pt)+'. Organiza os teus clientes e acompanha cada evolução.</p></div><div class="stat-grid">'+stats.map(([label,n])=>'<div class="stat"><strong>'+n+'</strong><span>'+label+'</span></div>').join('')+'</div><h2 class="section-heading">O que pretendes fazer?</h2><div class="feature-grid">'+features.map(([key,title,sub])=>'<button class="feature" data-go="'+key+'"><span class="feature-icon">'+icons[key]+'</span><strong>'+title+'</strong><small>'+sub+'</small></button>').join('')+'</div><section><h2>Próximas etapas</h2><p class="muted">Configura o ginásio, adiciona clientes de demonstração e experimenta os planos e as sessões. Os dados continuam guardados apenas neste dispositivo.</p></section>'
 }
 function decorateClients(){
