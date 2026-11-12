@@ -1,0 +1,32 @@
+name: GymBody - testes de qualidade
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Relatório e capturas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gymbody-test-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
