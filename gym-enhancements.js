@@ -20,6 +20,19 @@
  html[data-gym-theme="dark"] .share-panel p{color:#b9d3d0!important}
  html[data-gym-theme="dark"] .attendance-axis{stroke:#5a7778}
  html[data-gym-theme="dark"] .attendance-label{fill:#c0d5d5}
+
+ /* Contraste consistente em todos os formulários e cartões no modo escuro. */
+ html[data-gym-theme="dark"] section label,html[data-gym-theme="dark"] .custom-exercise-form label,html[data-gym-theme="dark"] .custom-exercise-form h2,html[data-gym-theme="dark"] .custom-exercise-form h3{color:#eef8f6!important}
+ html[data-gym-theme="dark"] .custom-exercise-form,html[data-gym-theme="dark"] .custom-card,html[data-gym-theme="dark"] .exercise-card,html[data-gym-theme="dark"] .exercise-detail{background:#1c292d!important;color:#eef8f6!important;border-color:#496063!important}
+ html[data-gym-theme="dark"] .custom-exercise-form input,html[data-gym-theme="dark"] .custom-exercise-form select,html[data-gym-theme="dark"] .custom-exercise-form textarea{background:#263539!important;color:#fff!important;border-color:#668184!important}
+ html[data-gym-theme="dark"] .custom-exercise-form input[type=file]{color:#eef8f6!important}
+ html[data-gym-theme="dark"] .custom-exercise-form input[type=file]::file-selector-button{background:#355450;color:#fff;border:1px solid #72948e;border-radius:8px;padding:7px 10px}
+ html[data-gym-theme="dark"] .photo-hint,html[data-gym-theme="dark"] .catalog-intro,html[data-gym-theme="dark"] .catalog-legend,html[data-gym-theme="dark"] .exercise-card small,html[data-gym-theme="dark"] .exercise-card .card-copy small{color:#c4d9d6!important}
+ html[data-gym-theme="dark"] .exercise-card .art,html[data-gym-theme="dark"] .exercise-detail .detail-art,html[data-gym-theme="dark"] .photo-thumb{background:#29423f!important}
+ html[data-gym-theme="dark"] .exercise-tag{color:#91e2d5!important}
+ html[data-gym-theme="dark"] .exercise-detail .secondary{background:#355450!important;color:#fff!important}
+ html[data-gym-theme="dark"] .item p,html[data-gym-theme="dark"] footer{color:#c4d9d6!important}
+ html[data-gym-theme="dark"] input:focus-visible,html[data-gym-theme="dark"] select:focus-visible,html[data-gym-theme="dark"] textarea:focus-visible{outline:2px solid #8ce4d4;outline-offset:2px}
  .attendance-chart{overflow-x:auto;max-width:100%}
  .attendance-chart svg{display:block;width:100%;height:auto;min-width:320px}
  .attendance-bars rect{fill:#0c827a}
