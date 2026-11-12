@@ -5,7 +5,7 @@ if(!Array.isArray(db.planosDatados))db.planosDatados=[];
 if(!Array.isArray(db.modelosTreino))db.modelosTreino=[];
 let client='',date=today(),name='',tipo='',hora='',duracao=60,draft=[],editing='',filter='',search='',remote=[],remoteLoading=false,remoteError='';
 async function ensureCatalog(){if(remote.length||remoteLoading)return;remoteLoading=true;remoteError='';try{remote=await window.GymBodyAllExercises()}catch(err){remoteError='Não foi possível carregar o catálogo online. Verifica a ligação à Internet.'}finally{remoteLoading=false;if(view==='planos'&&mode==='catalog')render()}}
-const e=h,validDate=s=>/^\d{4}-\d{2}-\d{2}$/.test(s)&&!Number.isNaN(new Date(s+'T12:00:00').getTime());
+const e=h,validDate=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;const [y,m,d]=s.split('-').map(Number);const dt=new Date(0);dt.setFullYear(y,m-1,d);return dt.getFullYear()===y&&dt.getMonth()===m-1&&dt.getDate()===d};
 const photo=x=>x?.foto||x?.repdbImage||'';
 const dateLabel=s=>validDate(s)?s.slice(8)+'/'+s.slice(5,7)+'/'+s.slice(0,4):s;
 const current=()=>db.planosDatados.find(p=>p.id===editing);
