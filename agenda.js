@@ -2,7 +2,7 @@
 /* GymBody v52 — agenda diária local, sem alterar os registos anteriores. */
 (function(){
 if(!Array.isArray(db.marcacoes))db.marcacoes=[];
-let day=today(),editing='',filter='';
+let day=today(),editing='',prefillPlan='';
 const esc=h,validDate=v=>/^\d{4}-\d{2}-\d{2}$/.test(v)&&!Number.isNaN(new Date(v+'T12:00:00').getTime());
 const shift=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return [x.getFullYear(),String(x.getMonth()+1).padStart(2,'0'),String(x.getDate()).padStart(2,'0')].join('-')};
 const minutes=t=>{const [a,b]=t.split(':').map(Number);return a*60+b};
