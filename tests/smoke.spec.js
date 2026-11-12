@@ -1,7 +1,7 @@
 const {test,expect}=require('@playwright/test');
 const screens=['inicio','clientes','avaliacoes','exercicios','planos','agenda','sessoes','relatorios','pagamentos','config','dados'];
 test.beforeEach(async({page})=>{
- await page.addInitScript(()=>{localStorage.removeItem('gymbody-data-v1');localStorage.removeItem('gymbody-theme-v1')});
+ await page.addInitScript(()=>{if(!sessionStorage.getItem('gymbody-test-initialized')){localStorage.removeItem('gymbody-data-v1');localStorage.removeItem('gymbody-theme-v1');sessionStorage.setItem('gymbody-test-initialized','1')}});
 });
 test('app starts and core screens render without uncaught errors',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
