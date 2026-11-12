@@ -1,5 +1,5 @@
 const {test,expect}=require('@playwright/test');
-test.beforeEach(async({page})=>{await page.addInitScript(()=>{localStorage.removeItem('gymbody-data-v1');localStorage.removeItem('gymbody-theme-v1')})});
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{if(!sessionStorage.getItem('gymbody-test-initialized')){localStorage.removeItem('gymbody-data-v1');localStorage.removeItem('gymbody-theme-v1');sessionStorage.setItem('gymbody-test-initialized','1')}})});
 test('client creation through the interface persists after reload',async({page})=>{
  await page.goto('/');
  await page.locator('[data-view="clientes"]').first().click();
