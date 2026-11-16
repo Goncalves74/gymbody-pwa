@@ -64,7 +64,7 @@ async function pdf(plan){
    let yy=y+(small?18:21);
    txt('Descanso: '+(row.descanso||0)+' s',x+3,yy,7.5);yy+=small?7:8;
    const step=small?6.3:7.2;
-   sets.forEach((set,j)=>{const label=(j+1)+'.ª série: '+set.reps+' rep.  |  '+String(set.carga).replace('.',',')+' kg';txt(fit(label,image?colW-39:colW-6,small?7.3:8),x+3,yy+j*step,small?7.3:8)});
+   sets.forEach((set,j)=>{const timed=(row.medicao||get('exercicios',row.exercicioId)?.medicao)==='tempo';const label=(j+1)+'.ª série: '+(timed?(set.tempo??row.tempo??45)+' s':(set.reps??row.reps??10)+' rep.')+'  |  '+String(set.carga??0).replace('.',',')+' kg';txt(fit(label,image?colW-39:colW-6,small?7.3:8),x+3,yy+j*step,small?7.3:8)});
    if(image){const iw=small?29:35,ih=small?28:35,ratio=image.w/image.h;const dw=Math.min(iw,ih*ratio),dh=Math.min(ih,iw/ratio);doc.addImage(image.data,'JPEG',x+colW-dw-3,y+h-dh-3,dw,dh)}
 
  };
