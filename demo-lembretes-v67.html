@@ -9,7 +9,7 @@
 <section class="panel"><h2>2. Simular verificação automática</h2><label for="clock">Relógio da simulação</label><input type="datetime-local" id="clock"><button id="run">Executar verificação de 30 minutos</button><button class="secondary" id="advance">Avançar 30 minutos</button><p class="muted">A simulação só envia para a caixa de mensagens abaixo. Uma mensagem já simulada não volta a ser enviada.</p><div class="grid"><div class="stat">Marcações<strong id="total">0</strong></div><div class="stat">Avisos simulados<strong id="sent">0</strong></div><div class="stat">PT ativos fictícios<strong id="pts">0</strong></div></div></section>
 <section class="panel"><h2>3. Agenda fictícia</h2><div style="overflow-x:auto"><table><thead><tr><th>Cliente</th><th>Treino</th><th>Aviso</th><th>Estado</th><th>Ações</th></tr></thead><tbody id="agenda"></tbody></table></div></section>
 <section class="panel"><h2>4. Caixa Telegram simulada</h2><div id="inbox"><p class="muted">Sem mensagens simuladas.</p></div></section>
-<section class="panel"><h2>5. Estatísticas fictícias dos PT</h2><p class="muted">Contagens demonstrativas; não existe recolha real de utilização.</p><div class="grid"><div class="stat">PT registados<strong>5</strong></div><div class="stat">Ativos em 7 dias<strong>3</strong></div><div class="stat">Ativos em 30 dias<strong>4</strong></div><div class="stat">Versão 67<strong>2</strong></div></div></section>
+<section class="panel"><h2>5. Teste REAL no teu Telegram</h2><p>Abre o bot através do botão, carrega em <strong>Iniciar</strong> no Telegram e aguarda a próxima execução do GitHub Actions (aproximadamente 30 minutos; pode haver atrasos). O bot responderá com um aviso fictício, apenas na conversa de teste autorizada.</p><p class="warn">A resposta só funciona se a tua conversa tiver sido identificada pela mensagem anterior «Teste GymBody» ou se o identificador da tua conversa estiver configurado como segredo no GitHub.</p><button id="realTelegram">Pedir mensagem REAL no Telegram</button><p id="demoCode" class="muted"></p></section><section class="panel"><h2>6. Estatísticas fictícias dos PT</h2><p class="muted">Contagens demonstrativas; não existe recolha real de utilização.</p><div class="grid"><div class="stat">PT registados<strong>5</strong></div><div class="stat">Ativos em 7 dias<strong>3</strong></div><div class="stat">Ativos em 30 dias<strong>4</strong></div><div class="stat">Versão 67<strong>2</strong></div></div></section>
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
@@ -45,6 +45,7 @@ function run(){
  }
  render();alert(count+' lembrete(s) simulado(s). Nenhuma mensagem real enviada.');
 }
+$('realTelegram').onclick=()=>{const code=String(Math.floor(100000+Math.random()*900000));$('demoCode').textContent='Código do teste: '+code+'. No Telegram, toca em Iniciar/Start para enviar o pedido ao bot.';window.open('https://t.me/GymBodyMiguelBot?start=gymdemo_'+code,'_blank','noopener,noreferrer')};
 $('add').onclick=()=>{
  const d=parse($('when').value);if(!Number.isFinite(d.getTime()))return alert('Data inválida.');
  items.push({id:++nextId,client:$('client').value,when:$('when').value,lead:Number($('lead').value),text:$('message').value.slice(0,500),status:'marcado'});render();
