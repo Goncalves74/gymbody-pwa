@@ -93,7 +93,7 @@ for u in updates:
     if m.get("chat",{}).get("type")!="private":
         continue
     command=m.get("text","").strip()
-    match=re.fullmatch(r"/start gb67_(\\d{10})_(15|30|60|120|1440)_(\\d{6})",command)
+    match=re.fullmatch(r"/start gb67_(\d{10})_(15|30|60|120|1440)_(\d{6})",command)
     if not match:
         continue
     chat=str(m["chat"]["id"])
