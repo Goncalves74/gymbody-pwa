@@ -4,6 +4,8 @@ Only private chat previously verified with 'Teste GymBody' is eligible.
 No PWA credentials, client data, or chat IDs are logged.
 """
 import datetime as dt
+import hashlib
+from pathlib import Path
 import json
 import os
 import sys
@@ -24,7 +26,18 @@ def api(method,fields):
 
 updates=api("getUpdates",{"timeout":0,"limit":100})
 messages=[u["message"] for u in updates if isinstance(u.get("message"),dict) and u["message"].get("chat",{}).get("type")=="private"]
-verified={str(m["chat"]["id"]) for m in messages if m.get("text","").strip().lower()=="teste gymbody"}
+# Keep only keyed hashes of verified chats in the public repository.
+# A hash cannot be used to send a Telegram message.
+allowfile=Path("demo-telegram-authorized.json")
+try:
+    known=set(json.loads(allowfile.read_text())) if allowfile.exists() else set()
+except (ValueError, OSError):
+    known=set()
+def fingerprint(chat):
+    return hashlib.sha256((token+":"+str(chat)).encode()).hexdigest()
+new_verified={fingerprint(m["chat"]["id"]) for m in messages if m.get("text","").strip().lower()=="teste gymbody"}
+known.update(new_verified)
+verified={str(m["chat"]["id"]) for m in messages if fingerprint(m["chat"]["id"]) in known}
 allowed=os.environ.get("TELEGRAM_TEST_CHAT_ID","").strip()
 if allowed:
     verified={allowed}
@@ -46,4 +59,5 @@ for m in messages:
 # Acknowledge all updates only after successful delivery to avoid retry on failures.
 if updates:
     api("getUpdates",{"offset":max(u["update_id"] for u in updates)+1,"timeout":0,"limit":1})
+allowfile.write_text(json.dumps(sorted(known),indent=2)+"\\n")
 print("GymBody demo: processed %d verified requests."%processed)
