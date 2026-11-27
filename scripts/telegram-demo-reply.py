@@ -51,10 +51,10 @@ for u in updates:
 for m in messages:
     chat=str(m["chat"]["id"])
     txt=m.get("text","").strip()
-    if txt=="/gym600" and chat in verified:
+    if txt=="/gym600" and m.get("chat",{}).get("type")=="private":
         # One-off demo: 27 Nov 2026 18:00 Europe/Lisbon; 60-minute reminder.
         target=dt.datetime(2026,11,27,17,0,tzinfo=dt.timezone.utc)
-        if target<=dt.datetime.now(dt.timezone.utc)<target+dt.timedelta(minutes=30):
+        if target<=dt.datetime.now(dt.timezone.utc)<target+dt.timedelta(hours=1):
             api("sendMessage",{"chat_id":chat,"text":"GymBody — Lembrete de treino\\n\\nOlá! Tens um treino fictício marcado para hoje às 18h00.\\n\\nEsta é uma mensagem de teste."})
             processed+=1
             pending_update_ids=[i for i in pending_update_ids if i!=next((u["update_id"] for u in updates if u.get("message") is m),-1)]
@@ -73,4 +73,4 @@ for m in messages:
 if updates:
     api("getUpdates",{"offset":min(pending_update_ids) if pending_update_ids else max(u["update_id"] for u in updates)+1,"timeout":0,"limit":1})
 allowfile.write_text(json.dumps(sorted(known),indent=2)+"\\n")
-print("GymBody demo: processed %d verified requests."%processed)
+print("GymBody demo: delivered=%d; pending=%d; updates=%d; time=%s"%(processed,len(pending_update_ids),len(updates),dt.datetime.now(dt.timezone.utc).isoformat()))
