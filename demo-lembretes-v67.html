@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GymBody v67 — Laboratório fictício</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color-scheme:light}body{max-width:900px;margin:auto;padding:18px;background:#f3f7f7;color:#183c40}h1{margin-bottom:0}small,.muted{color:#586b70}.panel{background:white;border:1px solid #dbe6e6;border-radius:15px;padding:17px;margin:15px 0}label{display:block;margin:12px 0 5px;font-weight:600}input,select,textarea,button{font:inherit;padding:10px;border-radius:9px;border:1px solid #a9c3c4;box-sizing:border-box}input,select,textarea{width:100%}textarea{min-height:90px}button{background:#176c5f;color:white;border:0;cursor:pointer;margin:4px 4px 4px 0}button.secondary{background:#e5eeee;color:#194c4a}table{width:100%;border-collapse:collapse}th,td{padding:10px 5px;text-align:left;border-bottom:1px solid #e1e9e9;font-size:14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.stat{background:#e8f5f1;padding:14px;border-radius:12px}.stat strong{display:block;font-size:27px}pre{white-space:pre-wrap;word-break:break-word;background:#eaf1f0;padding:12px;border-radius:10px} .warn{color:#8d4c00}
+</style></head><body>
+<h1>GymBody <small>v67 · laboratório</small></h1>
+<p class="muted">Ambiente independente com dados 100% fictícios. Não acede aos clientes, planos ou marcações reais. Não envia mensagens ao Telegram nem comunica dados ao GitHub.</p>
+<section class="panel"><h2>1. Configurar lembrete</h2><label for="client">Cliente fictício</label><select id="client"></select><label for="when">Data e hora do treino</label><input type="datetime-local" id="when"><label for="lead">Antecedência</label><select id="lead"><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="60" selected>1 hora</option><option value="120">2 horas</option><option value="1440">1 dia</option></select><label for="message">Mensagem</label><textarea id="message">Olá {cliente}, tens treino marcado para {data} às {hora}. Até breve!</textarea><button id="add">Criar marcação fictícia</button><button class="secondary" id="reset">Repor demonstração</button></section>
+<section class="panel"><h2>2. Simular verificação automática</h2><label for="clock">Relógio da simulação</label><input type="datetime-local" id="clock"><button id="run">Executar verificação de 30 minutos</button><button class="secondary" id="advance">Avançar 30 minutos</button><p class="muted">A simulação só envia para a caixa de mensagens abaixo. Uma mensagem já simulada não volta a ser enviada.</p><div class="grid"><div class="stat">Marcações<strong id="total">0</strong></div><div class="stat">Avisos simulados<strong id="sent">0</strong></div><div class="stat">PT ativos fictícios<strong id="pts">0</strong></div></div></section>
+<section class="panel"><h2>3. Agenda fictícia</h2><div style="overflow-x:auto"><table><thead><tr><th>Cliente</th><th>Treino</th><th>Aviso</th><th>Estado</th><th>Ações</th></tr></thead><tbody id="agenda"></tbody></table></div></section>
+<section class="panel"><h2>4. Caixa Telegram simulada</h2><div id="inbox"><p class="muted">Sem mensagens simuladas.</p></div></section>
+<section class="panel"><h2>5. Estatísticas fictícias dos PT</h2><p class="muted">Contagens demonstrativas; não existe recolha real de utilização.</p><div class="grid"><div class="stat">PT registados<strong>5</strong></div><div class="stat">Ativos em 7 dias<strong>3</strong></div><div class="stat">Ativos em 30 dias<strong>4</strong></div><div class="stat">Versão 67<strong>2</strong></div></div></section>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const people=['Ana Exemplo','Bruno Teste','Carla Demonstração'];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let items=[],sent=new Set(),inbox=[],nextId=0;
+function localInput(date){const d=new Date(date.getTime()-date.getTimezoneOffset()*60000);return d.toISOString().slice(0,16)}
+function parse(s){return new Date(s)}
+function formatDate(s){return parse(s).toLocaleDateString('pt-PT')}
+function formatTime(s){return parse(s).toLocaleTimeString('pt-PT',{hour:'2-digit',minute:'2-digit'})}
+function render(){
+ $('total').textContent=items.length;$('sent').textContent=inbox.length;$('pts').textContent=3;
+ $('agenda').innerHTML=items.map(x=>'<tr><td>'+esc(x.client)+'</td><td>'+esc(formatDate(x.when)+' '+formatTime(x.when))+'</td><td>'+esc(x.lead)+' min</td><td>'+esc(x.status)+'</td><td><button class="secondary" data-toggle="'+x.id+'">'+(x.status==='marcado'?'Cancelar':'Reativar')+'</button></td></tr>').join('');
+ $('inbox').innerHTML=inbox.length?inbox.map(x=>'<pre>'+esc(x)+'</pre>').join(''):'<p class="muted">Sem mensagens simuladas.</p>';
+}
+function reset(){
+ items=[];sent=new Set();inbox=[];nextId=0;
+ const base=new Date();base.setMinutes(0,0,0);base.setHours(base.getHours()+3);
+ const baseStr=localInput(base);
+ for(let i=0;i<3;i++){const d=new Date(base.getTime()+i*3600000);items.push({id:++nextId,client:people[i],when:localInput(d),lead:[60,30,120][i],text:'Olá {cliente}, tens treino marcado para {data} às {hora}. Até breve!',status:i===2?'cancelado':'marcado'})}
+ $('client').innerHTML=people.map(x=>'<option>'+esc(x)+'</option>').join('');
+ $('when').value=baseStr;$('clock').value=localInput(new Date(base.getTime()-90*60000));render();
+}
+function run(){
+ const now=parse($('clock').value);if(!Number.isFinite(now.getTime()))return alert('Indica uma data válida.');
+ let count=0;
+ for(const x of items){
+  const at=parse(x.when);const notice=new Date(at.getTime()-x.lead*60000);
+  const key=x.id+':'+x.when+':'+x.lead;
+  if(x.status!=='marcado'||sent.has(key)||now<notice||now>=at)continue;
+  const msg=x.text.replaceAll('{cliente}',x.client).replaceAll('{data}',formatDate(x.when)).replaceAll('{hora}',formatTime(x.when));
+  inbox.unshift('SIMULAÇÃO · '+x.client+'\n'+msg);sent.add(key);count++;
+ }
+ render();alert(count+' lembrete(s) simulado(s). Nenhuma mensagem real enviada.');
+}
+$('add').onclick=()=>{
+ const d=parse($('when').value);if(!Number.isFinite(d.getTime()))return alert('Data inválida.');
+ items.push({id:++nextId,client:$('client').value,when:$('when').value,lead:Number($('lead').value),text:$('message').value.slice(0,500),status:'marcado'});render();
+};
+$('reset').onclick=reset;$('run').onclick=run;
+$('advance').onclick=()=>{const d=parse($('clock').value);if(!Number.isFinite(d.getTime()))return;$('clock').value=localInput(new Date(d.getTime()+30*60000));run()};
+$('agenda').onclick=e=>{const b=e.target.closest('[data-toggle]');if(!b)return;const x=items.find(x=>x.id===Number(b.dataset.toggle));if(x){x.status=x.status==='marcado'?'cancelado':'marcado';render()}};
+reset();
+</script></body></html>
