@@ -1,0 +1,20 @@
+name: GymBody v67 - Telegram real demo (private chat)
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gymbody-demo-telegram
+  cancel-in-progress: false
+jobs:
+  telegram-demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Responder a pedidos fictícios autorizados
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_TEST_CHAT_ID: ${{ secrets.TELEGRAM_TEST_CHAT_ID }}
+        run: python3 scripts/telegram-demo-reply.py
