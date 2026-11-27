@@ -33,12 +33,12 @@ processed=0
 for m in messages:
     chat=str(m["chat"]["id"])
     txt=m.get("text","").strip()
-    if chat not in verified or not txt.startswith("/gymdemo "):
+    if chat not in verified or not (txt.startswith("/gymdemo ") or txt.startswith("/start gymdemo_")):
         continue
     # No processing of old messages, preventing replay after downtime.
     if abs(now-int(m.get("date",0)))>3600:
         continue
-    code=txt[len("/gymdemo "):].strip()
+    code=(txt[len("/gymdemo "):] if txt.startswith("/gymdemo ") else txt[len("/start gymdemo_"):]).strip()
     if not code.isdigit() or len(code)!=6:
         continue
     api("sendMessage",{"chat_id":chat,"text":"GymBody v67 — TESTE REAL\n\nRecebeste este aviso fictício pelo Telegram.\nCódigo do teste: "+code+"\n\nNão corresponde a nenhum treino real."})
