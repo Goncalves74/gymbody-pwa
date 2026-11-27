@@ -11,6 +11,8 @@ import os
 import sys
 import urllib.parse
 import urllib.request
+import subprocess
+import re
 
 token=os.environ.get("TELEGRAM_BOT_TOKEN","").strip()
 if not token:
@@ -69,6 +71,50 @@ for m in messages:
         continue
     api("sendMessage",{"chat_id":chat,"text":"GymBody v67 — TESTE REAL\n\nRecebeste este aviso fictício pelo Telegram.\nCódigo do teste: "+code+"\n\nNão corresponde a nenhum treino real."})
     processed+=1
+
+# v67: isolated fictional bookings, stored encrypted at rest in GitHub.
+queue_file=Path("demo-telegram-queue.enc")
+key=hashlib.sha256((token+":gymbody-demo-queue-v1").encode()).hexdigest()
+def crypt(data,decrypt=False):
+    args=["openssl","enc","-aes-256-cbc","-pbkdf2","-iter","100000","-pass","env:GYMBODY_QUEUE_KEY"]
+    args+=["-d"] if decrypt else ["-salt"]
+    proc=subprocess.run(args,input=data,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env={**os.environ,"GYMBODY_QUEUE_KEY":key},check=True)
+    return proc.stdout
+try:
+    queue=json.loads(crypt(queue_file.read_bytes(),True)) if queue_file.exists() else []
+except (ValueError,OSError,subprocess.CalledProcessError):
+    sys.exit("Encrypted queue unreadable: refusing to overwrite")
+if not isinstance(queue,list):
+    sys.exit("Invalid queue structure")
+# Telegram /start payload: gb67_<unix_timestamp>_<lead_minutes>_<six_digit_code>
+# Booking and recipient data remain fictitious and private.
+for u in updates:
+    m=u.get("message",{})
+    if m.get("chat",{}).get("type")!="private":
+        continue
+    command=m.get("text","").strip()
+    match=re.fullmatch(r"/start gb67_(\\d{10})_(15|30|60|120|1440)_(\\d{6})",command)
+    if not match:
+        continue
+    chat=str(m["chat"]["id"])
+    at=int(match.group(1));lead=int(match.group(2));code=match.group(3)
+    if not now-3600<=at<=now+14*86400:
+        continue
+    uid=str(u["update_id"])
+    if not any(x["update"]==uid for x in queue):
+        queue.append({"update":uid,"chat":chat,"at":at,"lead":lead,"code":code,"sent":False})
+        api("sendMessage",{"chat_id":chat,"text":"GymBody DEMO — treino fictício registado. Código: "+code+". Aviso programado para "+dt.datetime.fromtimestamp(at-lead*60,dt.timezone.utc).strftime("%d/%m %H:%M")+" (Portugal continental, horário de inverno)."})
+# Automatic delivery, at most once for each persisted booking after successful send.
+for booking in queue:
+    if booking["sent"] or now<booking["at"]-booking["lead"]*60 or now>=booking["at"]:
+        continue
+    api("sendMessage",{"chat_id":booking["chat"],"text":"GymBody — LEMBRETE AUTOMÁTICO\\n\\nTreino fictício marcado para "+dt.datetime.fromtimestamp(booking["at"],dt.timezone.utc).strftime("%d/%m às %H:%M")+" (Portugal).\\nCódigo: "+booking["code"]+"\\n\\nMensagem de demonstração."})
+    booking["sent"]=True
+    processed+=1
+# Keep a bounded history to limit retained data.
+queue=[x for x in queue if x["at"]>=now-86400][-200:]
+queue_file.write_bytes(crypt(json.dumps(queue).encode()))
+
 # Acknowledge all updates only after successful delivery to avoid retry on failures.
 if updates:
     api("getUpdates",{"offset":min(pending_update_ids) if pending_update_ids else max(u["update_id"] for u in updates)+1,"timeout":0,"limit":1})
