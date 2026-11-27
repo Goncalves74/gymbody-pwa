@@ -1,0 +1,16 @@
+name: Testar lembrete Telegram
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Obter ficheiros
+        uses: actions/checkout@v4
+      - name: Enviar mensagem de teste
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: python3 scripts/telegram-test.py
