@@ -1,0 +1,16 @@
+name: GymBody Telegram reminder scheduler (safe dry run)
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check reminder queue without sending
+        env:
+          GYMBODY_REMINDERS_JSON: ${{ secrets.GYMBODY_REMINDERS_JSON }}
+        run: python3 scripts/telegram-reminders.py
